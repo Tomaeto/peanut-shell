@@ -4,11 +4,17 @@ A simple Shell written in C++
 
 Run with `main.exe`
 
-`test.cpp` included to test building and executing a program through Peanut with the following commands:
+# Test Run
 
-`g++ ./src/test.cpp -o text.exe`
+Test compiling and running `test.cpp` with the following commands:
+
+`./main.exe`
+
+`g++ ./src/test.cpp -o test.exe`
 
 `./test.exe`
+
+This should print 'Hello!' to the terminal
 
 # To Build
 
