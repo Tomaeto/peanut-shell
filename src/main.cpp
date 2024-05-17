@@ -85,6 +85,7 @@ int date(char** args) {
     return 1;
 }
 
+//Builtin command: Create directory of given name
 int mkdir(char** args) {
     fs::create_directory(args[1]);
     return 1;
