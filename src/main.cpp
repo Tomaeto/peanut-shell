@@ -8,17 +8,19 @@
 #include <string>
 #include <chrono>
 #include <ctime>
+#include <fstream>
 #include <unistd.h>
 #include <sys/wait.h>
 namespace fs = std::filesystem;
 using namespace std;
 
-int cd(char** args);
-int ls(char** args);
-int help(char** args);
-int date(char** args);
-int mkdir(char** args);
-int exit(char** args);
+int cd(char** args, int &argc);
+int ls(char** args, int &argc);
+int help(char** args, int &argc);
+int date(char** args, int &argc);
+int mkdir(char** args, int &argc);
+int touch(char** args, int &argc);
+int exit(char** args, int &argc);
 
 char* builtin[] = {
     (char*)"cd",
@@ -26,22 +28,24 @@ char* builtin[] = {
     (char*)"help",
     (char*)"date",
     (char*)"mkdir",
+    (char*)"touch",
     (char*)"exit"
 };
 
 //Pointers to builtin functions
-int (*builtin_funcs[]) (char**) {
+int (*builtin_funcs[]) (char**, int&) {
     &cd,
     &ls,
     &help,
     &date,
     &mkdir,
+    &touch,
     &exit
 };
 int builtin_count = sizeof(builtin) / sizeof(char**);
 
 //Builtin command: change directory
-int cd(char** args) {
+int cd(char** args, int &argc) {
     fs::path fpath = fs::current_path();
     if (args[1] == NULL) {
         cout << "Peanut: Expected argument for cd\n";
@@ -59,7 +63,7 @@ int cd(char** args) {
 }
 
 //Builtin command: print current directory contents
-int ls(char** args) {
+int ls(char** args, int &argc) {
     cout << "Directory: " << fs::current_path().string() << endl;
     for (auto &file : fs::directory_iterator(fs::current_path())) {
         cout << "\t" << file << endl;
@@ -68,7 +72,7 @@ int ls(char** args) {
 }
 
 //Builtin command: print help
-int help(char** args) {
+int help(char** args, int &argc) {
     cout << "**Peanut Shell \n";
     cout << "**Enter program names and args to run\n";
     cout << "**The following are builtin commands: \n";
@@ -79,20 +83,37 @@ int help(char** args) {
 }
 
 //Builtin command: Print date and time
-int date(char** args) {
+int date(char** args, int &argc) {
     const time_t time = chrono::system_clock::to_time_t(chrono::system_clock::now());
     cout << ctime(&time);
     return 1;
 }
 
 //Builtin command: Create directory of given name
-int mkdir(char** args) {
+int mkdir(char** args, int &argc) {
     fs::create_directory(args[1]);
     return 1;
 }
 
+//Builtin command: Creates file(s) with given name(s)
+//Opens & closes given filename, creates file if it does not exist
+int touch(char** args, int &argc) {
+    if (args[1] == NULL) {
+        cout << "Expected argument for touch\n";
+        return 1;
+    }
+
+    string s;
+
+    for (int i = 1; i < argc; i++) {
+        s= args[i];
+        ofstream{s};
+    }
+    return 1;
+}
+
 //Builtin command: exit program
-int exit(char** args) {
+int exit(char** args, int &argc) {
     return 0;
 }
 
@@ -122,14 +143,14 @@ int shell_run(char** args) {
 
 //Executes shell input
 //Checks if arg matches any builtins, else runs general execute command
-int shell_execute(char** args) {
+int shell_execute(char** args, int argv) {
     if(args[0] == NULL) {
         cout << "No command entered.\n";
         return 1;
     }
     for (int i = 0; i < builtin_count; i++) {
         if (strcmp(args[0], builtin[i]) == 0) {
-            return builtin_funcs[i](args);
+            return builtin_funcs[i](args, argv);
         }
     }
     return shell_run(args);
@@ -150,7 +171,7 @@ char* shell_readline() {
 //Takes C-style string and tokenizes, splitting at any whitespace
 //Dynamically reallocates memory if needed
 //Returns C-style string array
-char** shell_splitline(char* line) {
+char** shell_splitline(char* line, int &argc) {
     int buffsize = BUFFSIZE;
     int position = 0;
     char** tokens = (char**) malloc(buffsize * sizeof(char*));
@@ -166,7 +187,7 @@ char** shell_splitline(char* line) {
     while (token != NULL) {
         tokens[position] = token;
         position++;
-
+        argc++;
         if (position >= buffsize) {
             buffsize += BUFFSIZE;
             tokens_backup = tokens;
@@ -188,12 +209,15 @@ char** shell_splitline(char* line) {
 void shell_loop() {
     char *input;
     char **args;
+    int argc;
     int status = 1;
     while(status) {
+        argc = 0;
         cout << "Peanut> ";
         input = shell_readline();
-        args = shell_splitline(input);
-        status = shell_execute(args);
+        args = shell_splitline(input, argc);
+        status = shell_execute(args, argc);
+
     }
 }
 
