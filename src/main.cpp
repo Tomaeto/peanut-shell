@@ -17,6 +17,7 @@ int cd(char** args);
 int ls(char** args);
 int help(char** args);
 int date(char** args);
+int mkdir(char** args);
 int exit(char** args);
 
 char* builtin[] = {
@@ -24,6 +25,7 @@ char* builtin[] = {
     (char*)"ls",
     (char*)"help",
     (char*)"date",
+    (char*)"mkdir",
     (char*)"exit"
 };
 
@@ -33,6 +35,7 @@ int (*builtin_funcs[]) (char**) {
     &ls,
     &help,
     &date,
+    &mkdir,
     &exit
 };
 int builtin_count = sizeof(builtin) / sizeof(char**);
@@ -79,6 +82,11 @@ int help(char** args) {
 int date(char** args) {
     const time_t time = chrono::system_clock::to_time_t(chrono::system_clock::now());
     cout << ctime(&time);
+    return 1;
+}
+
+int mkdir(char** args) {
+    fs::create_directory(args[1]);
     return 1;
 }
 
