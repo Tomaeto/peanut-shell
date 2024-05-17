@@ -28,5 +28,6 @@ run `g++ ./src/main.cpp -o main.exe` to compile program into a `main.exe` file
 * ls - Prints current directory and contents
 * help - Prints commands
 * date - Prints current date and time
+* mkdir - Creates directory with given name
 * exit - Exits Peanut Shell
 * [program] [args] - Runs program with given args
