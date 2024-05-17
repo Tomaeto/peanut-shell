@@ -6,6 +6,8 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <chrono>
+#include <ctime>
 #include <unistd.h>
 #include <sys/wait.h>
 namespace fs = std::filesystem;
@@ -13,13 +15,15 @@ using namespace std;
 
 int cd(char** args);
 int ls(char** args);
-int help(char**args);
+int help(char** args);
+int date(char** args);
 int exit(char** args);
 
 char* builtin[] = {
     (char*)"cd",
     (char*)"ls",
     (char*)"help",
+    (char*)"date",
     (char*)"exit"
 };
 
@@ -28,6 +32,7 @@ int (*builtin_funcs[]) (char**) {
     &cd,
     &ls,
     &help,
+    &date,
     &exit
 };
 int builtin_count = sizeof(builtin) / sizeof(char**);
@@ -67,6 +72,13 @@ int help(char** args) {
     for (int i = 0; i < builtin_count; i++) {
         cout << "\t" << builtin[i] << "\n";
     }
+    return 1;
+}
+
+//Builtin command: Print date and time
+int date(char** args) {
+    const time_t time = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    cout << ctime(&time);
     return 1;
 }
 
