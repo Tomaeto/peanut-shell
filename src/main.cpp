@@ -20,6 +20,7 @@ int help(char** args, int &argc);
 int date(char** args, int &argc);
 int mkdir(char** args, int &argc);
 int touch(char** args, int &argc);
+int rm(char** args, int &argc);
 int exit(char** args, int &argc);
 
 char* builtin[] = {
@@ -29,6 +30,7 @@ char* builtin[] = {
     (char*)"date",
     (char*)"mkdir",
     (char*)"touch",
+    (char*) "rm",
     (char*)"exit"
 };
 
@@ -40,6 +42,7 @@ int (*builtin_funcs[]) (char**, int&) {
     &date,
     &mkdir,
     &touch,
+    &rm,
     &exit
 };
 int builtin_count = sizeof(builtin) / sizeof(char**);
@@ -108,6 +111,25 @@ int touch(char** args, int &argc) {
     for (int i = 1; i < argc; i++) {
         s= args[i];
         ofstream{s};
+    }
+    return 1;
+}
+
+//Builtin command: removes file or directory
+// -r option recursively removes directory and all its contents
+int rm(char** args, int &argc) {
+    if (!strcmp(args[1], "-r")) {
+        if (argc < 3) {
+            cout << "Expected argument for rm\n";
+            return 1;
+        }
+        if (!fs::remove_all(args[2])) {
+            perror("Peanut");
+        }
+        return 1;
+    }
+    if (!fs::remove(args[1])) {
+        perror("Peanut");
     }
     return 1;
 }
@@ -217,7 +239,6 @@ void shell_loop() {
         input = shell_readline();
         args = shell_splitline(input, argc);
         status = shell_execute(args, argc);
-
     }
 }
 
@@ -225,6 +246,5 @@ void shell_loop() {
 int main(int argc, char** argv) {
     cout << "\033[2J\033[1;1H";
     shell_loop();
-
     return 0;
 }
