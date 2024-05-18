@@ -18,5 +18,6 @@ run `g++ ./src/main.cpp -o main.exe` to compile program into a `main.exe` file
 * date - Prints current date and time
 * mkdir - Creates directory with given name
 * touch - Creates file(s) specified in args
+* rm [-r] - Removes given file or directory, -r option removes directory & contents
 * exit - Exits Peanut Shell
 * [program] [args] - Runs program/command with given args
