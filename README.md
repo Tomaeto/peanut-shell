@@ -4,18 +4,6 @@ A simple Shell written in C++
 
 Run with `main.exe`
 
-# Test Run
-
-Test compiling and running `test.cpp` with the following commands:
-
-`./main.exe`
-
-`g++ ./src/test.cpp -o test.exe`
-
-`./test.exe`
-
-This should print 'Hello!' to the terminal
-
 # To Build
 
 Requires [Cygwin](https://www.cygwin.com/) C++ compiler
@@ -29,5 +17,6 @@ run `g++ ./src/main.cpp -o main.exe` to compile program into a `main.exe` file
 * help - Prints commands
 * date - Prints current date and time
 * mkdir - Creates directory with given name
+* touch - Creates file(s) specified in args
 * exit - Exits Peanut Shell
-* [program] [args] - Runs program with given args
+* [program] [args] - Runs program/command with given args
