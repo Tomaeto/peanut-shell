@@ -9,8 +9,12 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
-#include <unistd.h>
+#if _WIN32
+#include <windows.h>
+#elif defined(unix)
 #include <sys/wait.h>
+#include <unistd.h>
+#endif
 namespace fs = std::filesystem;
 using namespace std;
 
@@ -140,8 +144,10 @@ int exit(char** args, int &argc) {
 }
 
 //Runs program and waits for it to terminate
-//Uses forked child process to try and execute program from args
-int shell_run(char** args) {
+//For Unix, forks child process and attempts to run command
+//For Windows, uses system to attempt to run command
+int shell_run(char** args, char* input) {
+    #if defined(unix)
     int status;
     pid_t pid, wpid;
     if ((pid = fork()) == 0) {
@@ -159,13 +165,18 @@ int shell_run(char** args) {
         //Parent process
         wait(NULL);
     }
+    #elif _WIN32
+    system(input);
+    #endif
     return 1;
 
 }
 
 //Executes shell input
+//Takes input line for 
 //Checks if arg matches any builtins, else runs general execute command
-int shell_execute(char** args, int argv) {
+int shell_execute(char** args, char* input, int argv) {
+
     if(args[0] == NULL) {
         cout << "No command entered.\n";
         return 1;
@@ -175,7 +186,8 @@ int shell_execute(char** args, int argv) {
             return builtin_funcs[i](args, argv);
         }
     }
-    return shell_run(args);
+
+    return shell_run(args, input);
 }
 
 //Reads in line and converts to C-style string
@@ -192,20 +204,21 @@ char* shell_readline() {
 #define DELIMS " \t\n\a\r"
 //Takes C-style string and tokenizes, splitting at any whitespace
 //Dynamically reallocates memory if needed
+//Stores copy of original input and restores input after tokeinzation
 //Returns C-style string array
-char** shell_splitline(char* line, int &argc) {
+char** shell_splitline(char* input, int &argc) {
     int buffsize = BUFFSIZE;
     int position = 0;
     char** tokens = (char**) malloc(buffsize * sizeof(char*));
     char** tokens_backup;
     char* token;
-
+    char* input_backup = strdup(input);
     if (!tokens) {
         cout << "Peanut: Allocation error\n";
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, DELIMS);
+    token = strtok(input, DELIMS);
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -223,6 +236,9 @@ char** shell_splitline(char* line, int &argc) {
         }
         token = strtok(NULL, DELIMS);
     }
+    
+    strcpy(input, input_backup);
+    delete input_backup;
     tokens[position] = NULL;
     return tokens;
 }
@@ -238,7 +254,7 @@ void shell_loop() {
         cout << "Peanut> ";
         input = shell_readline();
         args = shell_splitline(input, argc);
-        status = shell_execute(args, argc);
+        status = shell_execute(args, input, argc);
     }
 }
 
