@@ -1,12 +1,12 @@
 # Peanut Shell: Simple Shell Program
 
-A simple Shell written in C++
+A simple cross-platform Shell written in C++
 
 Run with `main.exe`
 
 # To Build
 
-Requires [Cygwin](https://www.cygwin.com/) C++ compiler
+Cross-plaform for Windows and Unix systems
 
 run `g++ ./src/main.cpp -o main.exe` to compile program into a `main.exe` file
 
